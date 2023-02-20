@@ -1,0 +1,13 @@
+name: IngameTimedPermission
+version: '${projectVersion}'
+main: net.okocraft.ingametimedpermission.Main
+api-version: 1.19
+commands:
+  timedpermission:
+    aliases:
+      - timedpermission
+      - itp
+    description: "add or remove temporary permission."
+permissions:
+  ingametimedpermission.use:
+    default: op
