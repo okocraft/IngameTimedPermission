@@ -91,11 +91,16 @@ public class PlayerDataLoader implements Listener {
 
     private Properties load(UUID player) {
         Path dataFilePath = getDataFilePath(player);
-        try (var in = Files.newInputStream(dataFilePath)) {
+        try {
             if (!Files.exists(dataFilePath)) {
                 Files.createDirectories(dataFilePath.getParent());
                 Files.createFile(dataFilePath);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try (var in = Files.newInputStream(dataFilePath)) {
             Properties data = new Properties();
             data.load(in);
             return data;
