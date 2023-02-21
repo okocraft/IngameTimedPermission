@@ -1,13 +1,12 @@
-name: IngameTimedPermission
+name: TimedPerms
 version: '${projectVersion}'
-main: net.okocraft.ingametimedpermission.Main
+main: net.okocraft.timedperms.Main
 api-version: 1.19
 commands:
-  timedpermission:
+  timedperms:
     aliases:
-      - timedpermission
-      - itp
-    description: "add or remove temporary permission."
+      - tperms
+    description: "Command to set temporary permissions only which time passes a player is in game."
 permissions:
-  ingametimedpermission.use:
+  timedperms.use:
     default: op

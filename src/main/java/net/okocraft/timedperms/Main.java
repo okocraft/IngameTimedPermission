@@ -1,4 +1,4 @@
-package net.okocraft.ingametimedpermission;
+package net.okocraft.timedperms;
 
 import java.util.Locale;
 import java.util.OptionalInt;
@@ -49,6 +49,7 @@ public class Main extends JavaPlugin implements Listener {
         // timedpermission add <player> <permission> <time>;
         // timedpermission set <player> <permission> <time>;
 
+        // TODO Offline playerでもできる方法を考える (ひいてはplayerdataloaderの内部構造へ...)
         Player player = getServer().getPlayer(args[1]);
         if (player == null) {
             sender.sendMessage(args[1] + " is not online^^");

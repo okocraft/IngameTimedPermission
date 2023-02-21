@@ -1,4 +1,4 @@
-package net.okocraft.ingametimedpermission;
+package net.okocraft.timedperms;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -128,12 +128,11 @@ public class PlayerDataLoader implements Listener {
     }
 
     private void setPermission(String user, String perm, boolean set) {
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
-            plugin.getServer().dispatchCommand(
-                    plugin.getServer().getConsoleSender(),
-                    "lp user " + user + " permission " + (set ? "set" : "unset") + " " + perm
-            );
-        });
+        // TODO: LUCKPERM REQUIRED. 全権の人のispermissionsetが常にtrueだからlpでなんとかする
+        plugin.getServer().getScheduler().runTask(plugin, () -> plugin.getServer().dispatchCommand(
+                plugin.getServer().getConsoleSender(),
+                "lp user " + user + " permission " + (set ? "set" : "unset") + " " + perm
+        ));
     }
 
     private static int getInt(Properties p, String key) {

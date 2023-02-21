@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "ingametimedpermission"
+rootProject.name = "timedperms"
