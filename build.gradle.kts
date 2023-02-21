@@ -1,5 +1,5 @@
 plugins {
-    java
+    `java-library`
 }
 
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
+    api("net.luckperms:api:5.4")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

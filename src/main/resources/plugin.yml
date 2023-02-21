@@ -2,6 +2,8 @@ name: TimedPerms
 version: '${projectVersion}'
 main: net.okocraft.timedperms.Main
 api-version: 1.19
+depend:
+  - LuckPerms
 commands:
   timedperms:
     aliases:
