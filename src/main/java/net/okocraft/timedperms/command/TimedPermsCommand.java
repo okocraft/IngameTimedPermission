@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.luckperms.api.node.types.PermissionNode;
 import net.okocraft.timedperms.Main;
@@ -50,7 +51,13 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
             return true;
         }
 
-        OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(args[1]);
+        OfflinePlayer offlinePlayer;
+        try {
+            offlinePlayer = plugin.getServer().getOfflinePlayer(UUID.fromString(args[1]));
+        } catch (IllegalArgumentException e) {
+            offlinePlayer = plugin.getServer().getOfflinePlayer(args[1]);
+        }
+
         if (!offlinePlayer.hasPlayedBefore()) {
             sender.sendMessage("player not found.");
             return true;
@@ -77,8 +84,12 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         String sub = args[0];
 
         PermissionNode node = nodeBuilder.build();
-        int secondDelta;
+        if (sub.equalsIgnoreCase("show")) {
+            sender.sendMessage(offlinePlayer.getName() + "'s seconds left for permmission " + node + " is " + player.getSeconds(node));
+            return true;
+        }
 
+        int secondDelta;
         if (args.length >= i + 1) {
             secondDelta = tryParse(args[i]).orElse(-1);
         } else if (sub.equalsIgnoreCase("remove")) {
@@ -114,11 +125,12 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
             return new ArrayList<>();
         }
 
+        // timedperms show <player> <permission [context=value ...]>;
         // timedperms remove <player> <permission [context=value ...]> [time];
         // timedperms add <player> <permission [context=value ...]> <time>;
         // timedperms set <player> <permission [context=value ...]> <time>;
 
-        List<String> subCommands = Arrays.asList("remove", "add", "set");
+        List<String> subCommands = Arrays.asList("show", "remove", "add", "set");
         if (args.length == 1) {
             return StringUtil.copyPartialMatches(args[0].toLowerCase(Locale.ROOT), subCommands, new ArrayList<>());
         }
@@ -149,7 +161,11 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         }
 
         if (i + 1 == args.length) {
-            return Arrays.asList("context=value", "time");
+            if (subCommand.equalsIgnoreCase("show")) {
+                return Collections.singletonList("context=value");
+            } else {
+                return Arrays.asList("context=value", "time");
+            }
         } else {
             return new ArrayList<>();
         }

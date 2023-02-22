@@ -8,6 +8,7 @@ commands:
   timedperms:
     aliases:
       - tperms
+      - tperm
     description: "Command to set temporary permissions only which time passes a player is in game."
 permissions:
   timedperms.use:
