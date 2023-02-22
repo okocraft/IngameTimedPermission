@@ -5,21 +5,21 @@ import net.luckperms.api.node.types.PermissionNode;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class TimedPermissionRegisteredEvent extends TimedPermissionEvent {
+public class TimedPermissionUnregisteredEvent extends TimedPermissionEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private final int initialSeconds;
+    private final int lastSeconds;
     private final TimedPermissionEvent cause;
 
-    public TimedPermissionRegisteredEvent(UUID userUid, PermissionNode permission, int initialSeconds, TimedPermissionEvent cause) {
+    public TimedPermissionUnregisteredEvent(UUID userUid, PermissionNode permission, int lastSeconds, TimedPermissionEvent cause) {
         super(userUid, permission);
-        this.initialSeconds = initialSeconds;
+        this.lastSeconds = lastSeconds;
         this.cause = cause;
     }
 
-    public int getInitialSeconds() {
-        return this.initialSeconds;
+    public int getLastSeconds() {
+        return this.lastSeconds;
     }
 
     public TimedPermissionEvent getCause() {

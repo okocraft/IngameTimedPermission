@@ -1,18 +1,16 @@
 package net.okocraft.timedperms.event;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
+import net.luckperms.api.node.types.PermissionNode;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class TimedPermissionCountEvent extends TimedPermissionSecondsModifyEvent {
+public class TimedPermissionCountEvent extends TimedPermissionModifyEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public TimedPermissionCountEvent(UUID userUid, String permission, Map<String, Set<String>> contexts,
-                                     int previousSeconds, int newSeconds) {
-        super(userUid, permission, contexts, previousSeconds, newSeconds);
+    public TimedPermissionCountEvent(UUID userUid, PermissionNode permission, int previousSeconds, int newSeconds) {
+        super(userUid, permission, previousSeconds, newSeconds);
     }
 
     @Override

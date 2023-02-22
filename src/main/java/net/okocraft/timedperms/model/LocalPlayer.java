@@ -9,16 +9,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.IntBinaryOperator;
 import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.data.NodeMap;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.util.Tristate;
+import net.okocraft.timedperms.event.TimedPermissionAddEvent;
 import net.okocraft.timedperms.event.TimedPermissionCountEvent;
+import net.okocraft.timedperms.event.TimedPermissionEvent;
 import net.okocraft.timedperms.event.TimedPermissionExpireEvent;
 import net.okocraft.timedperms.event.TimedPermissionRegisteredEvent;
-import net.okocraft.timedperms.event.TimedPermissionRemovedEvent;
-import net.okocraft.timedperms.event.TimedPermissionSecondsModifyEvent;
+import net.okocraft.timedperms.event.TimedPermissionRemoveEvent;
+import net.okocraft.timedperms.event.TimedPermissionSetEvent;
+import net.okocraft.timedperms.event.TimedPermissionUnregisteredEvent;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -47,7 +51,7 @@ public class LocalPlayer implements Closeable {
 
     public void countOne() {
         if (!closed) {
-            timedPermissions.replaceAll(newSecondsCalculator(1, (seconds, delta) -> seconds - delta));
+            timedPermissions.replaceAll(newSecondsCalculator(1, OperationType.COUNT));
         }
     }
 
@@ -56,94 +60,62 @@ public class LocalPlayer implements Closeable {
     }
 
     public int addSeconds(PermissionNode permission, int delta) {
-        return operateSeconds(permission, delta, Integer::sum);
+        return operateSeconds(permission, delta, OperationType.ADD);
     }
 
     public int removeSeconds(PermissionNode permission, int delta) {
-        return operateSeconds(permission, delta, (seconds, delta_) -> seconds - delta_);
+        return operateSeconds(permission, delta, OperationType.REMOVE);
     }
 
     public int setSeconds(PermissionNode permission, int seconds) {
-        return operateSeconds(permission, seconds, (oldValue, newValue) -> newValue);
+        return operateSeconds(permission, seconds, OperationType.SET);
     }
 
-    private int operateSeconds(PermissionNode permission, int delta, IntBinaryOperator operator) {
+    private int operateSeconds(PermissionNode permission, int delta, OperationType operationType) {
         if (closed) {
             return -1;
         }
-        Integer ret = timedPermissions.compute(permission, newSecondsCalculator(delta, operator));
+        Integer ret = timedPermissions.compute(permission, newSecondsCalculator(delta, operationType));
         return ret == null ? -1 : ret;
     }
 
-    private BiFunction<PermissionNode, Integer, Integer> newSecondsCalculator(int delta, IntBinaryOperator operator) {
+    private BiFunction<PermissionNode, Integer, Integer> newSecondsCalculator(int delta, OperationType operationType) {
         return (permission, seconds) -> {
-            if (seconds == null) {
-                seconds = 0;
+            int newSeconds =  operationType.getOperator().applyAsInt(seconds == null ? 0 : seconds, delta);
+            boolean unregister = newSeconds <= 0;
+            if (seconds == null && unregister) {
+                return null;
             }
 
-            int newSeconds = operator.applyAsInt(seconds, delta);
-            if (newSeconds <= 0) {
-                if (seconds <= 0) {
-                    return null;
+            TimedPermissionEvent event = operationType.createEvent(uniqueId, permission, seconds == null ? 0 : seconds, newSeconds);
+            Bukkit.getPluginManager().callEvent(event);
+            if (unregister) {
+                if (operationType == OperationType.COUNT) {
+                    event = new TimedPermissionExpireEvent(uniqueId, permission);
+                    Bukkit.getPluginManager().callEvent(event);
                 }
-                if (isPermissionSet(permission)) {
-                    setPermission(permission, Tristate.UNDEFINED);
-                }
-                if (seconds - 1 == newSeconds) {
-                    Bukkit.getPluginManager().callEvent(new TimedPermissionExpireEvent(
-                            uniqueId,
-                            permission.getPermission(),
-                            permission.getContexts().toMap(),
-                            seconds));
-                } else {
-                    Bukkit.getPluginManager().callEvent(new TimedPermissionRemovedEvent(
-                            uniqueId,
-                            permission.getPermission(),
-                            permission.getContexts().toMap(),
-                            seconds));
-                }
-                return null;
-            } else {
-                if (seconds == 0) {
-                    Bukkit.getPluginManager().callEvent(new TimedPermissionRegisteredEvent(
-                            uniqueId,
-                            permission.getPermission(),
-                            permission.getContexts().toMap(),
-                            newSeconds));
-                } else if (seconds - 1 == newSeconds) {
-                    Bukkit.getPluginManager().callEvent(new TimedPermissionCountEvent(
-                            uniqueId,
-                            permission.getPermission(),
-                            permission.getContexts().toMap(),
-                            seconds,
-                            newSeconds));
-                } else {
-                    Bukkit.getPluginManager().callEvent(new TimedPermissionSecondsModifyEvent(
-                            uniqueId,
-                            permission.getPermission(),
-                            permission.getContexts().toMap(),
-                            seconds,
-                            newSeconds));
-                }
-                if (!isPermissionSet(permission)) {
-                    setPermission(permission, Tristate.TRUE);
-                }
-                return newSeconds;
+                Bukkit.getPluginManager().callEvent(
+                        new TimedPermissionUnregisteredEvent(uniqueId, permission, newSeconds, event)
+                );
+            } else if (seconds == null) {
+                Bukkit.getPluginManager().callEvent(
+                        new TimedPermissionRegisteredEvent(uniqueId, permission, newSeconds, event)
+                );
             }
+
+            checkPermission(permission, !unregister);
+            return unregister ? null : newSeconds;
         };
     }
 
-    public boolean isPermissionSet(PermissionNode permission) {
-        return !closed && getUser().data().contains(permission, Node::equals) != Tristate.UNDEFINED;
-    }
+    private void checkPermission(PermissionNode permission, boolean shouldPermissionTrue) {
+        NodeMap data = getUser().data();
+        boolean permissionUndefined = data.contains(permission, Node::equals) == Tristate.UNDEFINED;
 
-    public void setPermission(PermissionNode permission, Tristate state) {
-        if (!closed) {
-            if (state == Tristate.UNDEFINED) {
-                getUser().data().remove(permission);
-            } else {
-                getUser().data().add(permission.toBuilder().value(state.asBoolean()).build());
-            }
+        if (permissionUndefined && shouldPermissionTrue) {
+            data.add(permission.toBuilder().value(true).build());
+        } else if (!permissionUndefined && !shouldPermissionTrue) {
+            data.remove(permission);
         }
     }
 
@@ -188,5 +160,31 @@ public class LocalPlayer implements Closeable {
 
     public boolean isClosed() {
         return this.closed;
+    }
+
+    private enum OperationType {
+        ADD((seconds, delta) -> seconds + delta),
+        REMOVE((seconds, delta) -> seconds - delta),
+        SET((seconds, delta) -> delta),
+        COUNT((seconds, delta) -> seconds - delta);
+
+        private final IntBinaryOperator operator;
+
+        OperationType(IntBinaryOperator operator) {
+            this.operator = operator;
+        }
+
+        public IntBinaryOperator getOperator() {
+            return this.operator;
+        }
+
+        public TimedPermissionEvent createEvent(UUID userUid, PermissionNode permission, int previousSeconds, int newSeconds) {
+            return switch (this) {
+                case ADD -> new TimedPermissionAddEvent(userUid, permission, previousSeconds, newSeconds);
+                case REMOVE -> new TimedPermissionRemoveEvent(userUid, permission, previousSeconds);
+                case SET -> new TimedPermissionSetEvent(userUid, permission, previousSeconds, newSeconds);
+                case COUNT -> new TimedPermissionCountEvent(userUid, permission, previousSeconds, newSeconds);
+            };
+        }
     }
 }

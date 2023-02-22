@@ -5,12 +5,12 @@ import net.luckperms.api.node.types.PermissionNode;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class TimedPermissionExpireEvent extends TimedPermissionRemoveEvent {
+public class TimedPermissionAddEvent extends TimedPermissionModifyEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public TimedPermissionExpireEvent(UUID userUid, PermissionNode permission) {
-        super(userUid, permission, 1);
+    public TimedPermissionAddEvent(UUID userUid, PermissionNode permission, int previousSeconds, int newSeconds) {
+        super(userUid, permission, previousSeconds, newSeconds);
     }
 
     @Override
