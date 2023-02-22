@@ -12,9 +12,9 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.PermissionNode;
 import net.okocraft.timedperms.Main;
@@ -28,7 +28,7 @@ final class LocalPlayerDataSerializer {
     private LocalPlayerDataSerializer() {
     }
 
-    static Map<PermissionNode, Integer> loadFromFile(UUID player) {
+    static ConcurrentHashMap<PermissionNode, Integer> loadFromFile(UUID player) {
         try (JsonReader reader = GSON.newJsonReader(new InputStreamReader(
                 Files.newInputStream(preparePlayerDataFile(player)), StandardCharsets.UTF_8))) {
 
@@ -36,7 +36,7 @@ final class LocalPlayerDataSerializer {
             if (raw != null) {
                 return deserializeUserData(raw);
             } else {
-                return new HashMap<>();
+                return new ConcurrentHashMap<>();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -63,8 +63,8 @@ final class LocalPlayerDataSerializer {
         return arr;
     }
 
-    private static Map<PermissionNode, Integer> deserializeUserData(JsonArray data) {
-        Map<PermissionNode, Integer> map = new HashMap<>();
+    private static ConcurrentHashMap<PermissionNode, Integer> deserializeUserData(JsonArray data) {
+        ConcurrentHashMap<PermissionNode, Integer> map = new ConcurrentHashMap<>();
 
         data.forEach(jsonObj -> {
             JsonObject copy = jsonObj.deepCopy().getAsJsonObject();

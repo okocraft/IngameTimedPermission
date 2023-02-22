@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.IntBinaryOperator;
@@ -33,7 +34,7 @@ public class LocalPlayer implements Closeable {
 
     private boolean closed = false;
 
-    LocalPlayer(UUID uniqueId, Map<PermissionNode, Integer> timedPermissions) {
+    LocalPlayer(UUID uniqueId, ConcurrentHashMap<PermissionNode, Integer> timedPermissions) {
         this.uniqueId = uniqueId;
         this.timedPermissions = timedPermissions;
     }
@@ -157,6 +158,7 @@ public class LocalPlayer implements Closeable {
     public void close() {
         closed = true;
         timedPermissions.clear();
+        LocalPlayerFactory.close(this);
     }
 
     public boolean isClosed() {
