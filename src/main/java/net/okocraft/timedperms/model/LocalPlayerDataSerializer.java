@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.PermissionNode;
 import net.okocraft.timedperms.Main;
 import net.okocraft.timedperms.luckpermsinternal.NodeJsonSerializer;
@@ -52,34 +53,29 @@ final class LocalPlayerDataSerializer {
         }
     }
 
-    static JsonArray serializeUserData(Map<PermissionNode, Integer> map) {
+    private static JsonArray serializeUserData(Map<PermissionNode, Integer> map) {
         JsonArray arr = new JsonArray();
-        map.forEach((node, timeLeft) -> {
-            JsonObject serialized = serializeNode(node);
-            serialized.addProperty("timedperms-timeLeft", timeLeft);
+        map.forEach((permission, seconds) -> {
+            JsonObject serialized = NodeJsonSerializer.serializeNode(permission, false).getAsJsonObject();
+            serialized.addProperty("timedperms-timeLeft", seconds);
             arr.add(serialized);
         });
         return arr;
     }
 
-    static Map<PermissionNode, Integer> deserializeUserData(JsonArray data) {
+    private static Map<PermissionNode, Integer> deserializeUserData(JsonArray data) {
         Map<PermissionNode, Integer> map = new HashMap<>();
 
         data.forEach(jsonObj -> {
             JsonObject copy = jsonObj.deepCopy().getAsJsonObject();
-            int timeLeft = copy.remove("timedperms-timeLeft").getAsInt();
-            map.put(deserializeNode(copy), timeLeft);
+            int seconds = copy.remove("timedperms-timeLeft").getAsInt();
+            Node permission = NodeJsonSerializer.deserializeNode(data);
+            if (permission instanceof PermissionNode) {
+                map.put((PermissionNode) permission, seconds);
+            }
         });
 
         return map;
-    }
-
-    private static JsonObject serializeNode(PermissionNode node) {
-        return NodeJsonSerializer.serializeNode(node, false).getAsJsonObject();
-    }
-
-    private static PermissionNode deserializeNode(JsonObject data) {
-        return (PermissionNode) NodeJsonSerializer.deserializeNode(data);
     }
 
     private static Path preparePlayerDataFile(LocalPlayer player) {

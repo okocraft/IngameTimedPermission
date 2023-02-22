@@ -119,6 +119,7 @@ public class LocalPlayer implements Closeable {
         }
     }
 
+    @ApiStatus.Internal
     public void onPermissionRemoved(Set<PermissionNode> removed) {
         timedPermissions.keySet().removeAll(removed);
     }
@@ -137,7 +138,7 @@ public class LocalPlayer implements Closeable {
         }
     }
 
-    @ApiStatus.Internal
+    // todo write javadoc to make developer use close or saveAndClose finally.
     public void saveAndClose() {
         save();
         LocalPlayerFactory.close(this);
@@ -151,7 +152,7 @@ public class LocalPlayer implements Closeable {
         LocalPlayerDataSerializer.saveToFile(this);
     }
 
-    @ApiStatus.Internal
+    // todo write javadoc to make developer use close or saveAndClose finally.
     @Override
     public void close() {
         closed = true;
