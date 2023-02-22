@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
@@ -18,7 +19,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,13 +28,12 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
 
     private final Set<String> playerNames;
 
-    @SuppressWarnings("deprecation")
     public TimedPermsCommand(Main plugin) {
         this.plugin = plugin;
-        long twoMonthAgo = System.currentTimeMillis() - 2 * 30 * 24 * 60 * 60 * 1000L;
-        this.playerNames = Arrays.stream(this.plugin.getServer().getOfflinePlayers()).parallel()
-                .filter(p -> p.getLastPlayed() > twoMonthAgo)
+        this.playerNames = Arrays.stream(this.plugin.getServer().getOfflinePlayers())
                 .map(OfflinePlayer::getName)
+                .filter(Objects::nonNull)
+                .map(s -> s.toLowerCase(Locale.ROOT))
                 .collect(Collectors.toSet());
     }
 
@@ -132,7 +131,9 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
 
         List<String> subCommands = Arrays.asList("show", "remove", "add", "set");
         if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0].toLowerCase(Locale.ROOT), subCommands, new ArrayList<>());
+            return subCommands.stream()
+                    .filter(s -> s.startsWith(args[0].toLowerCase(Locale.ROOT)))
+                    .collect(Collectors.toList());
         }
         String subCommand = args[0].toLowerCase(Locale.ROOT);
         if (!subCommands.contains(subCommand)) {
@@ -140,7 +141,9 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         }
 
         if (args.length == 2) {
-            return StringUtil.copyPartialMatches(args[1].toLowerCase(Locale.ROOT), playerNames, new ArrayList<>());
+            return playerNames.stream()
+                    .filter(s -> s.startsWith(args[1].toLowerCase(Locale.ROOT)))
+                    .collect(Collectors.toList());
         }
 
         if (args.length == 3) {
