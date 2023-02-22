@@ -5,7 +5,7 @@ import net.luckperms.api.node.types.PermissionNode;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class TimedPermissionModifyEvent extends TimedPermissionEvent {
+public abstract class TimedPermissionModifyEvent extends TimedPermissionEvent {
 
     private static final HandlerList handlers = new HandlerList();
     private final int previousSeconds;
