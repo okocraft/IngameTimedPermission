@@ -10,10 +10,13 @@ version = "1.0.0"
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
+    compileOnly("me.clip:placeholderapi:2.11.1")
+
     api("net.luckperms:api:5.4")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")

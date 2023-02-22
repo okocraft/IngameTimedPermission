@@ -1,14 +1,13 @@
 name: TimedPerms
 version: '${projectVersion}'
 main: net.okocraft.timedperms.Main
+authors: ["LazyGon"]
 api-version: 1.19
-depend:
-  - LuckPerms
+depend: ["LuckPerms"]
+softdepend: ["PlaceholderAPI"]
 commands:
   timedperms:
-    aliases:
-      - tperms
-      - tperm
+    aliases: ["tperms", "tperm"]
     description: "Command to set temporary permissions only which time passes a player is in game."
 permissions:
   timedperms.use:

@@ -104,14 +104,14 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         }
 
         if (sub.equalsIgnoreCase("remove")) {
-            player.removeSeconds(node, secondDelta);
-            sender.sendMessage("success removing for " + node.getPermission() + " " + secondDelta + " seconds (now " + player.getSeconds(node) + ").");
+            int now = player.removeSeconds(node, secondDelta);
+            sender.sendMessage("success removing for " + node + " " + secondDelta + " seconds (now " + now + ").");
         } else if (sub.equalsIgnoreCase("add")) {
-            player.addSeconds(node, secondDelta);
-            sender.sendMessage("success adding for " + node.getPermission() + " " + secondDelta + " seconds (now " + player.getSeconds(node) + ").");
+            int now = player.addSeconds(node, secondDelta);
+            sender.sendMessage("success adding for " + node + " " + secondDelta + " seconds (now " + now + ").");
         } else if (sub.equalsIgnoreCase("set")) {
-            player.setSeconds(node, secondDelta);
-            sender.sendMessage("success setting for " + node.getPermission() + " " + secondDelta + " seconds.");
+            int now = player.setSeconds(node, secondDelta);
+            sender.sendMessage("success setting " + node + " to " + now + " seconds.");
         } else {
             sender.sendMessage("add, remove or set required.");
         }
