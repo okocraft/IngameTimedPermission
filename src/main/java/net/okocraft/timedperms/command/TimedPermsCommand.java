@@ -114,6 +114,7 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         if (subCommand.equalsIgnoreCase("remove")) {
             int now = player.removeSeconds(node, secondDelta);
             sender.sendMessage(translatable("command-timedperms-remove").color(NamedTextColor.GREEN).args(
+                    text(offlinePlayer.getName()).color(NamedTextColor.AQUA),
                     text(toString(node)).color(NamedTextColor.AQUA),
                     text(secondDelta).color(NamedTextColor.AQUA),
                     text(now).color(NamedTextColor.AQUA)
@@ -121,6 +122,7 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         } else if (subCommand.equalsIgnoreCase("add")) {
             int now = player.addSeconds(node, secondDelta);
             sender.sendMessage(translatable("command-timedperms-add").color(NamedTextColor.GREEN).args(
+                    text(offlinePlayer.getName()).color(NamedTextColor.AQUA),
                     text(toString(node)).color(NamedTextColor.AQUA),
                     text(secondDelta).color(NamedTextColor.AQUA),
                     text(now).color(NamedTextColor.AQUA)
@@ -128,6 +130,7 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         } else if (subCommand.equalsIgnoreCase("set")) {
             int now = player.setSeconds(node, secondDelta);
             sender.sendMessage(translatable("command-timedperms-set").color(NamedTextColor.GREEN).args(
+                    text(offlinePlayer.getName()).color(NamedTextColor.AQUA),
                     text(toString(node)).color(NamedTextColor.AQUA),
                     text(now).color(NamedTextColor.AQUA)
             ));
