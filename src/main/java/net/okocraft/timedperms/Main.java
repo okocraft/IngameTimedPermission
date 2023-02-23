@@ -1,10 +1,14 @@
 package net.okocraft.timedperms;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import net.okocraft.timedperms.command.TimedPermsCommand;
+import net.okocraft.timedperms.language.TranslationManager;
 import net.okocraft.timedperms.listener.PlayerListener;
 import net.okocraft.timedperms.model.LocalPlayer;
 import net.okocraft.timedperms.model.LocalPlayerFactory;
@@ -17,10 +21,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
 
+
+    private final TranslationManager translationManager = new TranslationManager(
+            getName(), getDescription().getVersion(), getJarPath(), getDataFolder().toPath());
     private final PlayerListener playerListener = new PlayerListener();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final TimedPermsCommand commandHandler = new TimedPermsCommand(this);
     private PlaceholderHook placeholderHook;
+
+    @Override
+    public void onLoad() {
+        translationManager.load();
+    }
 
     @Override
     public void onEnable() {
@@ -64,5 +76,23 @@ public class Main extends JavaPlugin implements Listener {
 
         playerListener.unsubscribeLuckPermsEvents();
         HandlerList.unregisterAll(playerListener);
+
+        translationManager.unload();
+    }
+
+    public static Path getJarPath() {
+        String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        Path jarFilePath;
+        try {
+            // for linux.
+            jarFilePath = Paths.get(path);
+        } catch (InvalidPathException e) {
+            // for windows.
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            jarFilePath = Paths.get(path);
+        }
+        return jarFilePath;
     }
 }
