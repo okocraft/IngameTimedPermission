@@ -65,7 +65,6 @@ final class LocalPlayerDataSerializer {
 
     private static ConcurrentHashMap<PermissionNode, Integer> deserializeUserData(JsonArray data) {
         ConcurrentHashMap<PermissionNode, Integer> map = new ConcurrentHashMap<>();
-
         data.forEach(jsonObj -> {
             JsonObject copy = jsonObj.deepCopy().getAsJsonObject();
             int seconds = copy.remove("timedperms-timeLeft").getAsInt();
@@ -74,7 +73,6 @@ final class LocalPlayerDataSerializer {
                 map.put((PermissionNode) permission, seconds);
             }
         });
-
         return map;
     }
 

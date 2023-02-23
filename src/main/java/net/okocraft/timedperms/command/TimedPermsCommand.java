@@ -91,7 +91,7 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         if (subCommand.equalsIgnoreCase("show")) {
             sender.sendMessage(translatable("command-timedperms-show").color(NamedTextColor.GREEN).args(
                     text(offlinePlayer.getName()).color(NamedTextColor.AQUA),
-                    text(node.getPermission() + "(" + toString(node.getContexts()) + ")").color(NamedTextColor.AQUA),
+                    text(toString(node)).color(NamedTextColor.AQUA),
                     text(player.getSeconds(node)).color(NamedTextColor.AQUA)
             ));
             return true;
@@ -114,21 +114,21 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         if (subCommand.equalsIgnoreCase("remove")) {
             int now = player.removeSeconds(node, secondDelta);
             sender.sendMessage(translatable("command-timedperms-remove").color(NamedTextColor.GREEN).args(
-                    text(node.getPermission() + "(" + toString(node.getContexts()) + ")").color(NamedTextColor.AQUA),
+                    text(toString(node)).color(NamedTextColor.AQUA),
                     text(secondDelta).color(NamedTextColor.AQUA),
                     text(now).color(NamedTextColor.AQUA)
             ));
         } else if (subCommand.equalsIgnoreCase("add")) {
             int now = player.addSeconds(node, secondDelta);
             sender.sendMessage(translatable("command-timedperms-add").color(NamedTextColor.GREEN).args(
-                    text(node.getPermission() + "(" + toString(node.getContexts()) + ")").color(NamedTextColor.AQUA),
+                    text(toString(node)).color(NamedTextColor.AQUA),
                     text(secondDelta).color(NamedTextColor.AQUA),
                     text(now).color(NamedTextColor.AQUA)
             ));
         } else if (subCommand.equalsIgnoreCase("set")) {
             int now = player.setSeconds(node, secondDelta);
             sender.sendMessage(translatable("command-timedperms-set").color(NamedTextColor.GREEN).args(
-                    text(node.getPermission() + "(" + toString(node.getContexts()) + ")").color(NamedTextColor.AQUA),
+                    text(toString(node)).color(NamedTextColor.AQUA),
                     text(now).color(NamedTextColor.AQUA)
             ));
         } else {
@@ -203,9 +203,10 @@ public class TimedPermsCommand implements CommandExecutor, TabExecutor {
         }
     }
 
-    private static String toString(ContextSet contexts) {
+    private static String toString(PermissionNode node) {
+        ContextSet contexts = node.getContexts();
         StringBuilder sb = new StringBuilder();
         contexts.forEach(c -> sb.append(c.getKey()).append("=").append(c.getValue()).append(","));
-        return sb.substring(0, sb.length() - 1);
+        return node.getPermission() + "(" + sb.substring(0, sb.length() - 1) + ")";
     }
 }

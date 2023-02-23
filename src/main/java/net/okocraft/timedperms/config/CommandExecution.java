@@ -21,15 +21,15 @@ public record CommandExecution(
     List<String> commands
 ) {
 
-    private static List<CommandExecution> CACHE;
+    private static List<CommandExecution> cache;
     private static Main plugin;
 
     public static List<CommandExecution> getExecutions() {
-        if (CACHE == null) {
-            CACHE = getPlugin().getConfiguration()
+        if (cache == null) {
+            cache = getPlugin().getConfiguration()
                     .getList("command-executions", CommandExecutionSerializer.SERIALIZER);
         }
-        return CACHE;
+        return cache;
     }
 
     private static Main getPlugin() {

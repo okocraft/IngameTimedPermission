@@ -117,17 +117,14 @@ public class PlayerListener implements Listener {
     }
 
     private void onNodeChange(PermissionHolder permissionHolder, Set<Node> before, Set<Node> after) {
-        if (!(permissionHolder instanceof User)) {
-            return;
+        if (permissionHolder instanceof User) {
+            LocalPlayerFactory.get(((User) permissionHolder).getUniqueId()).onPermissionRemoved(before.stream()
+                    .filter(node -> node instanceof PermissionNode)
+                    .map(node -> (PermissionNode) node)
+                    .filter(Predicate.not(after::contains))
+                    .collect(Collectors.toSet())
+            );
         }
 
-        User user = (User) permissionHolder;
-        LocalPlayerFactory.get(user.getUniqueId()).onPermissionRemoved(
-                before.stream()
-                        .filter(node -> node instanceof PermissionNode)
-                        .map(node -> (PermissionNode) node)
-                        .filter(Predicate.not(after::contains))
-                        .collect(Collectors.toSet())
-        );
     }
 }

@@ -26,7 +26,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
 
-
     private final YamlConfiguration configuration = YamlConfiguration.create(getDataFolder().toPath().resolve("config.yml"));
     private final TranslationManager translationManager = new TranslationManager(
             getName(), getDescription().getVersion(), getJarPath(), getDataFolder().toPath());
@@ -49,7 +48,6 @@ public class Main extends JavaPlugin implements Listener {
             getLogger().log(Level.SEVERE, "Could not load config.yml", e);
             getServer().getPluginManager().disablePlugin(this);
         }
-
 
         getServer().getPluginManager().registerEvents(playerListener, this);
         playerListener.subscribeLuckPermsEvents();
