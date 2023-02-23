@@ -16,14 +16,22 @@ These commands require permission `timedperms.use`.
 * `/timedperms remove <player> <permission [context=value...]> [time-in-seconds]`
 
 ### Placeholders (PlaceholderAPI)
-Format of placeholders which return time of permission in seconds are:
-* with player: `%timedperms_<player>_<permission>_<context=value>_...%`
-* with player (comma): `%timedperms_<player>,<permission>,<context=value>,...%`
-* without player: `%timedperms_<permission>_<context=value>_...%` (executor required)
-* without player (comma): `%timedperms_<permission>,<context=value>,...%` (executor required)
+Format of placeholders which return time of permission are:
+* `%timedperms[_time|_seconds][_<player>]_<permission>_<context=value>_...%`
+* `%timedperms[,time|,seconds][,<player>],<permission>,<context=value>,...%`
 
-if permission contains underscore, use comma to retrieve data.
-even if player name contains underscore, you can use both format.
+For example:
+* `%timedperms_time_test.command.use_world=lobby_server=survival%`
+* `%timedperms,time,player_name,test_plugin.command.use,world=lobby,server=survival%`
+
+_time placeholder returns HHh:MMm:SSs format time.
+_seconds placeholder returns time in seconds.
+If invalid argument is specified, it treated as _seconds.
+
+If permission contains underscore, use comma to retrieve data.
+Even if player name contains underscore, you can use both format.
+
+If permission is not set or no data can be retrieved, placeholder return "-1".
 
 ### For Developers
 First, retrieve LocalPlayer from LocalPlayerFactory#get(). Then you can do some stuff with it. Methods which operate time of permission returns calculated new value. Those time operation will fire event below.

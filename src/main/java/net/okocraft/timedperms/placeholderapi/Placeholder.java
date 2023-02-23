@@ -1,5 +1,7 @@
 package net.okocraft.timedperms.placeholderapi;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.UUID;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -30,11 +32,26 @@ public class Placeholder extends PlaceholderExpansion {
         // identifier: %identifier_params% -> identifier
         // params: %identifier_params% -> params
 
-        // format1: %timedperms_<player>_<permission>_<context=value>_...% (returns seconds left)
-        // format2: %timedperms_<permission>_<context=value>_...% (executor required, returns seconds left)
+        // format1: %timedperms_seconds_<player>_<permission>_<context=value>_...% (returns seconds left)
+        // format2: %timedperms_seconds_<permission>_<context=value>_...% (executor required, returns seconds left)
+        // format3: %timedperms_time_<player>_<permission>_<context=value>_...% (returns seconds left)
+        // format4: %timedperms_time_<permission>_<context=value>_...% (executor required, returns seconds left)
 
         String[] args = params.split(params.contains(",") ? "," : "_", -1);
 
+        String[] subArray = new String[args.length - 1];
+        System.arraycopy(args, 1, subArray, 0, args.length - 1);
+        int seconds = getSecondsFromArgs(player, subArray);
+        if (args[0].equalsIgnoreCase("seconds")) {
+            return String.valueOf(seconds);
+        } else if (args[0].equalsIgnoreCase("time")) {
+            return Duration.of(seconds, ChronoUnit.SECONDS).toString().substring(2).toLowerCase(Locale.ROOT);
+        } else {
+            return String.valueOf(seconds);
+        }
+    }
+
+    public int getSecondsFromArgs(OfflinePlayer context, String[] args) {
         int permissionIndex = -1;
         for (int i = 0; i < args.length; i++) {
             permissionIndex = i - 1;
@@ -43,12 +60,12 @@ public class Placeholder extends PlaceholderExpansion {
             }
         }
         if (permissionIndex < 0) {
-            return "-1";
+            return -1;
         }
 
         OfflinePlayer offlinePlayer;
         if (permissionIndex == 0) {
-            offlinePlayer = player;
+            offlinePlayer = context;
         } else {
             String[] nameSplit = new String[permissionIndex];
             System.arraycopy(args, 0, nameSplit, 0, permissionIndex);
@@ -61,7 +78,7 @@ public class Placeholder extends PlaceholderExpansion {
         }
 
         if (!offlinePlayer.hasPlayedBefore()) {
-            return "-1";
+            return -1;
         }
         LocalPlayer localPlayer = LocalPlayerFactory.get(offlinePlayer.getUniqueId());
 
@@ -72,7 +89,7 @@ public class Placeholder extends PlaceholderExpansion {
             if (arg.contains("=")) {
                 String[] argPart = arg.split("=", -1);
                 if (argPart.length != 2) {
-                    return "-1";
+                    return -1;
                 }
                 builder.withContext(argPart[0], argPart[1]);
             } else {
@@ -80,7 +97,7 @@ public class Placeholder extends PlaceholderExpansion {
             }
         }
 
-        return String.valueOf(localPlayer.getSeconds(builder.build()));
+        return localPlayer.getSeconds(builder.build());
     }
 
     @Override
