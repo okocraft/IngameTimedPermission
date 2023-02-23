@@ -33,7 +33,7 @@ public record PlaceholderRequirement(
         }
 
         String replaced = hook.setPlaceholder(playerContext, placeholder);
-        if (regex.isEmpty() && !replaced.matches(regex)) {
+        if (!regex.isEmpty() && !replaced.matches(regex)) {
             return false;
         }
 
