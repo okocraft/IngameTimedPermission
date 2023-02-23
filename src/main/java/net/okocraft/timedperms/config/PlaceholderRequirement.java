@@ -1,5 +1,6 @@
 package net.okocraft.timedperms.config;
 
+import java.util.List;
 import net.okocraft.timedperms.Main;
 import net.okocraft.timedperms.placeholderapi.PlaceholderHook;
 import org.bukkit.OfflinePlayer;
@@ -8,7 +9,8 @@ public record PlaceholderRequirement(
     String placeholder,
     String regex,
     Double moreThan,
-    Double lessThan
+    Double lessThan,
+    List<String> commandsOnDenied
 ) {
 
     private static Main plugin;

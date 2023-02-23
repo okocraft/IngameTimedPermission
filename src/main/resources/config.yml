@@ -14,7 +14,8 @@ command-executions:
       regex: ".*regexstring.*"
       more-than: 100 # placeholder return value should be number.
       less-than: 100 # placeholder return value should be number.
-
+      commands-on-denied:
+        - "tell %player_name% not enough something!!!"
     command-source: console # or player
     commands:
       # placeholderapi placeholder is available if installed.

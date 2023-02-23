@@ -10,7 +10,7 @@ import net.okocraft.timedperms.model.LocalPlayerFactory;
 import net.okocraft.timedperms.placeholderapi.PlaceholderHook;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 public record CommandExecution(
     TriggerType trigger,
@@ -78,25 +78,27 @@ public record CommandExecution(
 
     public void executeCommands(OfflinePlayer playerContext) {
         getPlugin().getServer().getScheduler().runTask(getPlugin(), () -> {
-            if (!LocalPlayerFactory.get(playerContext.getUniqueId()).hasPermission(playerPermission)) {
+            if (!playerPermission.isEmpty()
+                    && !LocalPlayerFactory.get(playerContext.getUniqueId()).hasPermission(playerPermission)) {
                 return;
             }
+
+            CommandSender sender = isConsoleSource ? Bukkit.getConsoleSender() : playerContext.getPlayer();
+            if (sender == null) {
+                return;
+            }
+
             if (!placeholderRequirement.check(playerContext)) {
-                return;
-            }
-            if (isConsoleSource()) {
-                getReplacedCommands(playerContext).forEach(
-                        command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+                replaceCommands(playerContext, placeholderRequirement.commandsOnDenied())
+                        .forEach(command -> Bukkit.dispatchCommand(sender, command));
             } else {
-                Player player = playerContext.getPlayer();
-                if (player != null) {
-                    getReplacedCommands(playerContext).forEach(command -> Bukkit.dispatchCommand(player, command));
-                }
+                replaceCommands(playerContext, commands)
+                        .forEach(command -> Bukkit.dispatchCommand(sender, command));
             }
         });
     }
 
-    private List<String> getReplacedCommands(OfflinePlayer playerContext) {
+    private List<String> replaceCommands(OfflinePlayer playerContext, List<String> commands) {
         PlaceholderHook placeholder = getPlugin().getPlaceholderHook();
         return commands.stream()
                 .map(command -> placeholder == null ? command : placeholder.setPlaceholder(playerContext, command))

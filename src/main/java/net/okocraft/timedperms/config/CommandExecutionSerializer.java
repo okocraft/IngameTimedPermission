@@ -28,15 +28,18 @@ public class CommandExecutionSerializer implements ConfigurationSerializer<Comma
         PlaceholderRequirement placeholderRequirement = value.placeholderRequirement();
         if (!placeholderRequirement.placeholder().isEmpty()) {
             config.set("placeholder-requirement.placeholder", placeholderRequirement.placeholder());
-            config.set("placeholder-requirement.regex", placeholderRequirement.regex().isEmpty()
-                    ? null :
-                    placeholderRequirement.regex());
-            config.set("placeholder-requirement.more-than", placeholderRequirement.moreThan() == Double.MAX_VALUE
-                    ? null :
-                    placeholderRequirement.moreThan());
-            config.set("placeholder-requirement.less-than", placeholderRequirement.lessThan() == Double.MIN_VALUE
-                    ? null :
-                    placeholderRequirement.lessThan());
+        }
+        if (!placeholderRequirement.regex().isEmpty()) {
+            config.set("placeholder-requirement.regex", placeholderRequirement.regex());
+        }
+        if (placeholderRequirement.moreThan() == Double.MAX_VALUE) {
+            config.set("placeholder-requirement.more-than", placeholderRequirement.moreThan());
+        }
+        if (placeholderRequirement.lessThan() == Double.MIN_VALUE) {
+            config.set("placeholder-requirement.less-than", placeholderRequirement.lessThan());
+        }
+        if (!placeholderRequirement.commandsOnDenied().isEmpty()) {
+            config.set("placeholder-requirement.commands-on-denied", placeholderRequirement.commandsOnDenied());
         }
         config.set("command-source", value.isConsoleSource() ? "console" : "player");
         config.set("commands", value.commands());
@@ -77,7 +80,8 @@ public class CommandExecutionSerializer implements ConfigurationSerializer<Comma
                         config.getString("placeholder-requirement.placeholder"),
                         config.getString("placeholder-requirement.regex"),
                         config.getDouble("placeholder-requirement.more-than", Double.MAX_VALUE),
-                        config.getDouble("placeholder-requirement.less-than", Double.MIN_VALUE)
+                        config.getDouble("placeholder-requirement.less-than", Double.MIN_VALUE),
+                        config.getStringList("placeholder-requirement.commands-on-denied")
                 ),
                 new ArrayList<>(config.getStringList("commands"))
         );
