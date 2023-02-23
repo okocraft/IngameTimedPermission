@@ -1,9 +1,13 @@
 package net.okocraft.timedperms.listener;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.event.EventBus;
+import net.luckperms.api.event.EventSubscription;
+import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.node.NodeAddEvent;
 import net.luckperms.api.event.node.NodeClearEvent;
 import net.luckperms.api.event.node.NodeMutateEvent;
@@ -20,11 +24,19 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
 
+    private final Set<EventSubscription<? extends LuckPermsEvent>> subscriptions = new HashSet<>();
+
     public void subscribeLuckPermsEvents() {
-        LuckPermsProvider.get().getEventBus().subscribe(NodeMutateEvent.class, this::onNodeMutate);
-        LuckPermsProvider.get().getEventBus().subscribe(NodeRemoveEvent.class, this::onNodeRemove);
-        LuckPermsProvider.get().getEventBus().subscribe(NodeAddEvent.class, this::onNodeAdd);
-        LuckPermsProvider.get().getEventBus().subscribe(NodeClearEvent.class, this::onNodeClear);
+        EventBus eventBus = LuckPermsProvider.get().getEventBus();
+        subscriptions.add(eventBus.subscribe(NodeMutateEvent.class, this::onNodeMutate));
+        subscriptions.add(eventBus.subscribe(NodeRemoveEvent.class, this::onNodeRemove));
+        subscriptions.add(eventBus.subscribe(NodeAddEvent.class, this::onNodeAdd));
+        subscriptions.add(eventBus.subscribe(NodeClearEvent.class, this::onNodeClear));
+    }
+
+    public void unsubscribeLuckPermsEvents() {
+        subscriptions.forEach(EventSubscription::close);
+        subscriptions.clear();
     }
 
     @EventHandler

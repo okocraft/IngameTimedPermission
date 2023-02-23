@@ -53,6 +53,7 @@ public class LocalPlayer implements Closeable {
     public void countOne() {
         if (!closed) {
             timedPermissions.replaceAll(newSecondsCalculator(1, OperationType.COUNT));
+            timedPermissions.values().removeIf(seconds -> seconds <= 0);
         }
     }
 
@@ -77,7 +78,11 @@ public class LocalPlayer implements Closeable {
             return -1;
         }
         Integer ret = timedPermissions.compute(permission, newSecondsCalculator(delta, operationType));
-        return ret == null ? -1 : ret;
+        if (ret == null || ret <= 0) {
+            timedPermissions.remove(permission);
+            return -1;
+        }
+        return ret;
     }
 
     private BiFunction<PermissionNode, Integer, Integer> newSecondsCalculator(int delta, OperationType operationType) {
@@ -85,7 +90,7 @@ public class LocalPlayer implements Closeable {
             int newSeconds =  operationType.getOperator().applyAsInt(seconds == null ? 0 : seconds, delta);
             boolean unregister = newSeconds <= 0;
             if (seconds == null && unregister) {
-                return null;
+                return -1;
             }
 
             TimedPermissionEvent event = operationType.createEvent(uniqueId, permission, seconds == null ? 0 : seconds, newSeconds);
@@ -105,7 +110,7 @@ public class LocalPlayer implements Closeable {
             }
 
             checkPermission(permission, !unregister);
-            return unregister ? null : newSeconds;
+            return unregister ? -1 : newSeconds;
         };
     }
 

@@ -11,18 +11,19 @@ import net.okocraft.timedperms.model.LocalPlayerFactory;
 import net.okocraft.timedperms.placeholderapi.PlaceholderHook;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
 
+    private final PlayerListener playerListener = new PlayerListener();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final TimedPermsCommand commandHandler = new TimedPermsCommand(this);
     private PlaceholderHook placeholderHook;
 
     @Override
     public void onEnable() {
-        PlayerListener playerListener = new PlayerListener();
         getServer().getPluginManager().registerEvents(playerListener, this);
         playerListener.subscribeLuckPermsEvents();
 
@@ -30,12 +31,16 @@ public class Main extends JavaPlugin implements Listener {
         command.setExecutor(commandHandler);
         command.setTabCompleter(commandHandler);
 
-        executor.scheduleAtFixedRate(() -> getServer().getOnlinePlayers().stream()
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                getServer().getOnlinePlayers().stream()
                         .map(Entity::getUniqueId)
                         .map(LocalPlayerFactory::get)
-                        .forEach(LocalPlayer::countOne),
-                1, 1, TimeUnit.SECONDS
-        );
+                        .forEach(LocalPlayer::countOne);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }, 1, 1, TimeUnit.SECONDS);
 
         try {
             placeholderHook = new PlaceholderHook(this);
@@ -51,10 +56,13 @@ public class Main extends JavaPlugin implements Listener {
             placeholderHook.unregister();
         }
 
-        executor.shutdownNow();
+        executor.shutdownNow().forEach(Runnable::run);
         getServer().getOnlinePlayers().stream()
                 .map(Entity::getUniqueId)
                 .map(LocalPlayerFactory::get)
                 .forEach(LocalPlayer::saveAndClose);
+
+        playerListener.unsubscribeLuckPermsEvents();
+        HandlerList.unregisterAll(playerListener);
     }
 }

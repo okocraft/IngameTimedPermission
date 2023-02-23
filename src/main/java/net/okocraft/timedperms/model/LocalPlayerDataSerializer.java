@@ -69,7 +69,7 @@ final class LocalPlayerDataSerializer {
         data.forEach(jsonObj -> {
             JsonObject copy = jsonObj.deepCopy().getAsJsonObject();
             int seconds = copy.remove("timedperms-timeLeft").getAsInt();
-            Node permission = NodeJsonSerializer.deserializeNode(data);
+            Node permission = NodeJsonSerializer.deserializeNode(copy);
             if (permission instanceof PermissionNode) {
                 map.put((PermissionNode) permission, seconds);
             }
