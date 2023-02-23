@@ -9,6 +9,12 @@ command-executions:
           - test2
         othercontext: true
     player-permission: "timedperms.commandexecution.examplename"
+    placeholder-requirement: # commands are executed only if this section pass.
+      placeholder: "%placeholder-which-returns-boolean%"
+      regex: ".*regexstring.*"
+      more-than: 100 # placeholder return value should be number.
+      less-than: 100 # placeholder return value should be number.
+
     command-source: console # or player
     commands:
       # placeholderapi placeholder is available if installed.

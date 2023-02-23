@@ -18,6 +18,7 @@ public record CommandExecution(
     PermissionNode targetPermission,
     String playerPermission,
     boolean isConsoleSource,
+    PlaceholderRequirement placeholderRequirement,
     List<String> commands
 ) {
 
@@ -40,8 +41,7 @@ public record CommandExecution(
     }
 
     public void handleEvent(TimedPermissionEvent event, OfflinePlayer playerContext) {
-        if (!event.getPermission().equals(targetPermission)
-                || !LocalPlayerFactory.get(event.getUserUid()).hasPermission(playerPermission)) {
+        if (!event.getPermission().equals(targetPermission)) {
             return;
         }
 
@@ -78,6 +78,12 @@ public record CommandExecution(
 
     public void executeCommands(OfflinePlayer playerContext) {
         getPlugin().getServer().getScheduler().runTask(getPlugin(), () -> {
+            if (!LocalPlayerFactory.get(playerContext.getUniqueId()).hasPermission(playerPermission)) {
+                return;
+            }
+            if (!placeholderRequirement.check(playerContext)) {
+                return;
+            }
             if (isConsoleSource()) {
                 getReplacedCommands(playerContext).forEach(
                         command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
