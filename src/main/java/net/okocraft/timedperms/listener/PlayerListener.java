@@ -16,7 +16,18 @@ import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.PermissionNode;
+import net.okocraft.timedperms.config.CommandExecution;
+import net.okocraft.timedperms.event.TimedPermissionAddEvent;
+import net.okocraft.timedperms.event.TimedPermissionCountEvent;
+import net.okocraft.timedperms.event.TimedPermissionEvent;
+import net.okocraft.timedperms.event.TimedPermissionExpireEvent;
+import net.okocraft.timedperms.event.TimedPermissionRegisteredEvent;
+import net.okocraft.timedperms.event.TimedPermissionRemoveEvent;
+import net.okocraft.timedperms.event.TimedPermissionSetEvent;
+import net.okocraft.timedperms.event.TimedPermissionUnregisteredEvent;
 import net.okocraft.timedperms.model.LocalPlayerFactory;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -47,6 +58,46 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void onPlayerQuit(PlayerQuitEvent event) {
         LocalPlayerFactory.get(event.getPlayer().getUniqueId()).saveAndClose();
+    }
+
+    @EventHandler
+    private void onTimedPermissionRegistered(TimedPermissionRegisteredEvent event) {
+        handleTimedPermissionEvent(event);
+    }
+
+    @EventHandler
+    private void onTimedPermissionUnregistered(TimedPermissionUnregisteredEvent event) {
+        handleTimedPermissionEvent(event);
+    }
+
+    @EventHandler
+    private void onTimedPermissionCountEvent(TimedPermissionCountEvent event) {
+        handleTimedPermissionEvent(event);
+    }
+
+    @EventHandler
+    private void onTimedPermissionExpireEvent(TimedPermissionExpireEvent event) {
+        handleTimedPermissionEvent(event);
+    }
+
+    @EventHandler
+    private void onTimedPermissionAddEvent(TimedPermissionAddEvent event) {
+        handleTimedPermissionEvent(event);
+    }
+
+    @EventHandler
+    private void onTimedPermissionRemoveEvent(TimedPermissionRemoveEvent event) {
+        handleTimedPermissionEvent(event);
+    }
+
+    @EventHandler
+    private void onTimedPermissionSetEvent(TimedPermissionSetEvent event) {
+        handleTimedPermissionEvent(event);
+    }
+
+    private void handleTimedPermissionEvent(TimedPermissionEvent event) {
+        OfflinePlayer playerContext = Bukkit.getOfflinePlayer(event.getUserUid());
+        CommandExecution.getExecutions().forEach(execution -> execution.handleEvent(event, playerContext));
     }
 
     private void onNodeMutate(NodeMutateEvent event) {

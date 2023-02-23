@@ -1,0 +1,16 @@
+command-executions:
+  - trigger: expire # register, unregister, count, expire, add, remove, set
+    execution-offset: -5 # minus value can be specified only for expire. ignored for count.
+    target-permission:
+      key: "test.use"
+      context:
+        world:
+          - test1
+          - test2
+        othercontext: true
+    player-permission: "timedperms.commandexecution.examplename"
+    command-source: console # or player
+    commands:
+      # placeholderapi placeholder is available if installed.
+      # And target permission can also be specified (papi is not needed).
+      - tell %player_name% test(%permission%)

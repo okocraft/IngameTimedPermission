@@ -114,6 +114,10 @@ public class LocalPlayer implements Closeable {
         };
     }
 
+    public boolean hasPermission(String permission) {
+        return getUser().getCachedData().getPermissionData().checkPermission(permission).asBoolean();
+    }
+
     private void checkPermission(PermissionNode permission, boolean shouldPermissionTrue) {
         NodeMap data = getUser().data();
         boolean permissionUndefined = data.contains(permission, Node::equals) == Tristate.UNDEFINED;

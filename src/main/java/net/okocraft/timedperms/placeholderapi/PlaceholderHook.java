@@ -1,6 +1,8 @@
 package net.okocraft.timedperms.placeholderapi;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.okocraft.timedperms.Main;
+import org.bukkit.OfflinePlayer;
 
 public class PlaceholderHook {
 
@@ -16,5 +18,9 @@ public class PlaceholderHook {
 
     public void unregister() {
         placeholder.unregister();
+    }
+
+    public String setPlaceholder(OfflinePlayer context, String original) {
+        return PlaceholderAPI.setPlaceholders(context, original);
     }
 }

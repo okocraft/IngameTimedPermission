@@ -1,12 +1,17 @@
 package net.okocraft.timedperms;
 
+import com.github.siroshun09.configapi.api.util.ResourceUtils;
+import com.github.siroshun09.configapi.yaml.YamlConfiguration;
+import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import net.okocraft.timedperms.command.TimedPermsCommand;
 import net.okocraft.timedperms.language.TranslationManager;
 import net.okocraft.timedperms.listener.PlayerListener;
@@ -22,6 +27,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin implements Listener {
 
 
+    private final YamlConfiguration configuration = YamlConfiguration.create(getDataFolder().toPath().resolve("config.yml"));
     private final TranslationManager translationManager = new TranslationManager(
             getName(), getDescription().getVersion(), getJarPath(), getDataFolder().toPath());
     private final PlayerListener playerListener = new PlayerListener();
@@ -36,6 +42,15 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        try {
+            ResourceUtils.copyFromJarIfNotExists(getJarPath(), "config.yml", configuration.getPath());
+            configuration.load();
+        } catch (IOException e) {
+            getLogger().log(Level.SEVERE, "Could not load config.yml", e);
+            getServer().getPluginManager().disablePlugin(this);
+        }
+
+
         getServer().getPluginManager().registerEvents(playerListener, this);
         playerListener.subscribeLuckPermsEvents();
 
@@ -78,6 +93,24 @@ public class Main extends JavaPlugin implements Listener {
         HandlerList.unregisterAll(playerListener);
 
         translationManager.unload();
+    }
+
+    public YamlConfiguration getConfiguration() {
+        return this.configuration;
+    }
+
+    public PlaceholderHook getPlaceholderHook() {
+        return this.placeholderHook;
+    }
+
+    public ScheduledFuture<?> schedule(Runnable task, int delaySeconds) {
+        return this.executor.schedule(() -> {
+            try {
+                task.run();
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }, delaySeconds, TimeUnit.SECONDS);
     }
 
     public static Path getJarPath() {
