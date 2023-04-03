@@ -21,6 +21,7 @@ import net.okocraft.timedperms.placeholderapi.PlaceholderHook;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -73,10 +74,9 @@ public class Main extends JavaPlugin implements Listener {
 
         executor.scheduleAtFixedRate(() -> {
             try {
-                getServer().getOnlinePlayers().stream()
-                        .map(Entity::getUniqueId)
-                        .map(LocalPlayerFactory::get)
-                        .forEach(LocalPlayer::countOne);
+                for (Player p : getServer().getOnlinePlayers()) {
+                    LocalPlayerFactory.get(p.getUniqueId()).countOne();
+                }
             } catch (Throwable t) {
                 t.printStackTrace();
             }
@@ -97,10 +97,9 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         executor.shutdownNow().forEach(Runnable::run);
-        getServer().getOnlinePlayers().stream()
-                .map(Entity::getUniqueId)
-                .map(LocalPlayerFactory::get)
-                .forEach(LocalPlayer::saveAndClose);
+        for (Player p : getServer().getOnlinePlayers()) {
+            LocalPlayerFactory.get(p.getUniqueId()).saveAndClose();
+        }
 
         playerListener.unsubscribeLuckPermsEvents();
         HandlerList.unregisterAll(playerListener);
