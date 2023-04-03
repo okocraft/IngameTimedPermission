@@ -18,6 +18,7 @@ import net.okocraft.timedperms.listener.PlayerListener;
 import net.okocraft.timedperms.model.LocalPlayer;
 import net.okocraft.timedperms.model.LocalPlayerFactory;
 import net.okocraft.timedperms.placeholderapi.PlaceholderHook;
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
@@ -25,6 +26,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
+
+    private static final boolean FOLIA;
+
+    static {
+        boolean isFolia;
+        try {
+            Bukkit.class.getDeclaredMethod("getGlobalRegionScheduler");
+            isFolia = true;
+        } catch (NoSuchMethodException e) {
+            isFolia = false;
+        }
+
+        FOLIA = isFolia;
+    }
 
     private final YamlConfiguration configuration = YamlConfiguration.create(getDataFolder().toPath().resolve("config.yml"));
     private final TranslationManager translationManager = new TranslationManager(
@@ -99,6 +114,14 @@ public class Main extends JavaPlugin implements Listener {
 
     public PlaceholderHook getPlaceholderHook() {
         return this.placeholderHook;
+    }
+
+    public void runTask(Runnable task) {
+        if (FOLIA) {
+            getServer().getGlobalRegionScheduler().run(this, $ -> task.run());
+        } else {
+            getServer().getScheduler().runTask(this, task);
+        }
     }
 
     public ScheduledFuture<?> schedule(Runnable task, int delaySeconds) {

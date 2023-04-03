@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -16,16 +16,13 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
-    compileOnly("me.clip:placeholderapi:2.11.1")
+    compileOnly("dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT")
+    compileOnly("me.clip:placeholderapi:2.11.3")
 
     compileOnly("net.luckperms:api:5.4")
 
-    implementation("com.github.siroshun09.configapi:configapi-yaml:4.6.2-SNAPSHOT")
+    implementation("com.github.siroshun09.configapi:configapi-yaml:4.6.3")
     implementation("com.github.siroshun09.translationloader:translationloader:2.0.2")
-
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
 tasks {
@@ -46,10 +43,5 @@ tasks {
     build {
         dependsOn(shadowJar)
     }
-
-    test {
-        useJUnitPlatform()
-    }
-
 }
 

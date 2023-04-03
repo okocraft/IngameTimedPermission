@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.jar.JarFile;
+
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +66,8 @@ public class TranslationManager {
 
         Configuration source;
 
-        try (InputStream input = ResourceUtils.getInputStreamFromJar(jarFilePath, "languages/" + strLocale + ".yml")) {
+        try (JarFile jar = new JarFile(jarFilePath.toFile());
+             InputStream input = ResourceUtils.getInputStreamFromJar(jar, "languages/" + strLocale + ".yml")) {
             source = YamlConfiguration.loadFromInputStream(input);
         }
 

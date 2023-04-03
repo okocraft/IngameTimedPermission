@@ -77,7 +77,7 @@ public record CommandExecution(
     }
 
     public void executeCommands(OfflinePlayer playerContext) {
-        getPlugin().getServer().getScheduler().runTask(getPlugin(), () -> {
+        getPlugin().runTask(() -> {
             if (!playerPermission.isEmpty()
                     && !LocalPlayerFactory.get(playerContext.getUniqueId()).hasPermission(playerPermission)) {
                 return;
