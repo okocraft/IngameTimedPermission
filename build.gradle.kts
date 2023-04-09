@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    `maven-publish`
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -45,3 +46,33 @@ tasks {
     }
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+
+            from(components["java"])
+
+            pom {
+                name.set(project.name)
+                description.set("TimedPerms, plugin to implements in-game time temporary permission using LuckPerms.")
+                url.set("https://github.com/okocraft/timedperms")
+
+                licenses {
+                    license {
+                        name.set("GNU General Public License, Version 3.0")
+                        url.set("https://www.gnu.org/licenses/gpl-3.0.txt")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:https://github.com/okocraft/timedperms.git")
+                    developerConnection.set("scm:git:git@github.com:okocraft/timedperms.git")
+                    url.set("https://github.com/okocraft/timedperms")
+                }
+            }
+        }
+    }
+}
