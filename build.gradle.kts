@@ -4,8 +4,6 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-
 group = "net.okocraft"
 version = "1.0.0"
 
@@ -24,6 +22,13 @@ dependencies {
 
     implementation("com.github.siroshun09.configapi:configapi-yaml:4.6.3")
     implementation("com.github.siroshun09.translationloader:translationloader:2.0.2")
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
 }
 
 tasks {
