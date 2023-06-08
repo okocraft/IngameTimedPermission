@@ -43,7 +43,7 @@ tasks {
     }
 
     shadowJar {
-        relocate("com.github.siroshun09", "${group}.${name.toLowerCase()}.lib")
+        relocate("com.github.siroshun09", "${project.group}.${project.name.lowercase()}.lib")
     }
 
     build {
