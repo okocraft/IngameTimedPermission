@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.11.3")
 
     compileOnly("net.luckperms:api:5.4")
