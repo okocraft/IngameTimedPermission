@@ -12,3 +12,4 @@ commands:
 permissions:
   timedperms.use:
     default: op
+folia-supported: true
