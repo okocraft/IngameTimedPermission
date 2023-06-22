@@ -1,6 +1,7 @@
 package net.okocraft.timedperms.config;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import net.luckperms.api.node.types.PermissionNode;
 import net.okocraft.timedperms.Main;
@@ -72,12 +73,12 @@ public record CommandExecution(
         if (delay == 0) {
             executeCommands(playerContext);
         } else {
-            getPlugin().schedule(() -> executeCommands(playerContext), delay);
+            plugin.getScheduler().scheduleDelayedTask(() -> executeCommands(playerContext), delay, TimeUnit.SECONDS);
         }
     }
 
     public void executeCommands(OfflinePlayer playerContext) {
-        getPlugin().runTask(() -> {
+        plugin.getScheduler().runOnGlobalScheduler(() -> {
             if (!playerPermission.isEmpty()
                     && !LocalPlayerFactory.get(playerContext.getUniqueId()).hasPermission(playerPermission)) {
                 return;
