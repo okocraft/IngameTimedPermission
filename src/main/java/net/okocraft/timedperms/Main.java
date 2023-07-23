@@ -7,9 +7,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import net.okocraft.timedperms.command.TimedPermsCommand;
@@ -18,7 +15,7 @@ import net.okocraft.timedperms.listener.PlayerListener;
 import net.okocraft.timedperms.model.LocalPlayer;
 import net.okocraft.timedperms.model.LocalPlayerFactory;
 import net.okocraft.timedperms.placeholderapi.PlaceholderHook;
-import org.bukkit.Bukkit;
+import net.okocraft.timedperms.scheduler.Scheduler;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -28,25 +25,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
 
-    private static final boolean FOLIA;
-
-    static {
-        boolean isFolia;
-        try {
-            Bukkit.class.getDeclaredMethod("getGlobalRegionScheduler");
-            isFolia = true;
-        } catch (NoSuchMethodException e) {
-            isFolia = false;
-        }
-
-        FOLIA = isFolia;
-    }
-
     private final YamlConfiguration configuration = YamlConfiguration.create(getDataFolder().toPath().resolve("config.yml"));
     private final TranslationManager translationManager = new TranslationManager(
             getName(), getDescription().getVersion(), getJarPath(), getDataFolder().toPath());
     private final PlayerListener playerListener = new PlayerListener();
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final Scheduler scheduler = Scheduler.create(this);
     private final TimedPermsCommand commandHandler = new TimedPermsCommand(this);
     private PlaceholderHook placeholderHook;
 
@@ -72,7 +55,7 @@ public class Main extends JavaPlugin implements Listener {
         command.setExecutor(commandHandler);
         command.setTabCompleter(commandHandler);
 
-        executor.scheduleAtFixedRate(() -> {
+        scheduler.scheduleRepeatingTask(() -> {
             try {
                 for (Player p : getServer().getOnlinePlayers()) {
                     LocalPlayerFactory.get(p.getUniqueId()).countOne();
@@ -80,7 +63,7 @@ public class Main extends JavaPlugin implements Listener {
             } catch (Throwable t) {
                 t.printStackTrace();
             }
-        }, 1, 1, TimeUnit.SECONDS);
+        }, 1, TimeUnit.SECONDS);
 
         try {
             placeholderHook = new PlaceholderHook(this);
@@ -96,7 +79,8 @@ public class Main extends JavaPlugin implements Listener {
             placeholderHook.unregister();
         }
 
-        executor.shutdownNow().forEach(Runnable::run);
+        scheduler.shutdown();
+
         for (Player p : getServer().getOnlinePlayers()) {
             LocalPlayerFactory.get(p.getUniqueId()).saveAndClose();
         }
@@ -115,22 +99,8 @@ public class Main extends JavaPlugin implements Listener {
         return this.placeholderHook;
     }
 
-    public void runTask(Runnable task) {
-        if (FOLIA) {
-            getServer().getGlobalRegionScheduler().run(this, $ -> task.run());
-        } else {
-            getServer().getScheduler().runTask(this, task);
-        }
-    }
-
-    public ScheduledFuture<?> schedule(Runnable task, int delaySeconds) {
-        return this.executor.schedule(() -> {
-            try {
-                task.run();
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }, delaySeconds, TimeUnit.SECONDS);
+    public Scheduler getScheduler() {
+        return scheduler;
     }
 
     public static Path getJarPath() {
