@@ -63,11 +63,13 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void onTimedPermissionRegistered(TimedPermissionRegisteredEvent event) {
         handleTimedPermissionEvent(event);
+        LocalPlayerFactory.get(event.getUserUid());
     }
 
     @EventHandler
     private void onTimedPermissionUnregistered(TimedPermissionUnregisteredEvent event) {
         handleTimedPermissionEvent(event);
+        LocalPlayerFactory.get(event.getUserUid());
     }
 
     @EventHandler
