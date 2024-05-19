@@ -44,6 +44,9 @@ tasks {
 
     shadowJar {
         relocate("com.github.siroshun09", "${project.group}.${project.name.lowercase()}.lib")
+        manifest {
+            attributes("paperweight-mappings-namespace" to "mojang")
+        }
     }
 
     build {
